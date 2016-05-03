@@ -1,96 +1,37 @@
-<script type="text/ng-template" id="tree-dnd-template-render.html">
-    <div ng-class="(treeData.length) ? '' : 'list-group-item active '" ?>
-        <ul tree-dnd-nodes style="min-height: 100px">
-            <li tree-dnd-node="node" ng-repeat="node in treeData track by node.__hashKey__"
-                ng-show="node.__visible__" compile="expandingProperty.cellTemplate"
-                ng-include="'tree-dnd-template-fetch.html'"></li>
-        </ul>
-    </div>
-</script>
-<script type="text/ng-template" id="tree-dnd-template-fetch.html">
-    <div class="list-group-item text-info"
-         ng-class="(node.__selected__ ? 'list-group-item-success ':' ') + $node_class"
-         ng-click="onClick(node)"
-         ng-style="expandingProperty.cellStyle ? expandingProperty.cellStyle : {}">
-        <a class="btn btn-default" aria-label="Justify" type="button" tree-dnd-node-handle>
-            <span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span> </a>
-
-        {{node[expandingProperty.field] || node[expandingProperty]}}
-
-        <span ng-class="node.__icon_class__" ng-click="toggleExpand(node)"></span>
-
-        <div class="pull-right">
-            <span ng-repeat="col in colDefinitions" ng-class="col.cellClass" ng-style="col.cellStyle"
-                  compile="col.cellTemplate">
-                {{node[col.field]}}
-            </span>
-        </div>
+<script type="text/ng-template" id="list-node-template.html">
+    <div class="list-group-item tree-dnd-node" ng-class="{'selected': node.__selected__}" ng-mousedown="onSelect(node, $event)" ng-click="onClick(node, $event)" tree-dnd-node-handle>
+        <i class="tree-icon" ng-class="node.__icon_class__" ng-click="toggleExpand(node)"></i>
+        <i class="tree-icon" ng-class="getIcon(node)"></i>
+        <span>
+      {{node[expandingProperty.field] || node[expandingProperty]}}
+    </span>
+        <div style="flex-grow:1; height: 20px"></div>
     </div>
     <ul tree-dnd-nodes>
-        <li tree-dnd-node="node" ng-repeat="node in node.__children__ track by node.__hashKey__"
-            ng-show="node.__visible__" compile="expandingProperty.cellTemplate"
-            ng-include="'tree-dnd-template-fetch.html'"></li>
+        <li tree-dnd-node="node" ng-repeat="node in node.__children__ track by node.__hashKey__" ng-show="node.__visible__" compile="expandingProperty.cellTemplate" ng-include="'list-node-template.html'" on-select="select_handler(node)"></li>
     </ul>
 </script>
 
-<div class="col-xs-7">
-    <div class="row">
-        <panel title="Use Template-Url (Empty + Only Drop)" type="danger">
-            <tree-dnd
-                    tree-control="my_tree"
-                    column-defs="col_defs_min"
-                    expand-on="expanding_property"
-                    template-url="tree-dnd-template-render.html"
-
-                    enable-drop="true"
-
-                    icon-leaf="none"
-                    icon-expand="glyphicon glyphicon-chevron-down"
-                    icon-collapse="glyphicon glyphicon-chevron-right"
-                    ></tree-dnd>
-        </panel>
+<script type="text/ng-template" id="list-tree-template.html">
+    <div ng-class="(treeData.length) ? '' : 'list-group-item active '" ?>
+        <ul tree-dnd-nodes style="min-height: 100px">
+            <li tree-dnd-node="node" ng-repeat="node in treeData track by node.__hashKey__" ng-show="node.__visible__" compile="expandingProperty.cellTemplate" ng-include="'list-node-template.html'"></li>
+        </ul>
     </div>
+</script>
 
-    <div class="row">
-        <panel title="Use Template-Url (with data)">
-            <tree-dnd
-                    tree-data="tree_data"
-                    tree-control="my_tree"
-                    column-defs="col_defs_min"
-                    expand-on="expanding_property"
-                    template-url="tree-dnd-template-render.html"
-
-                    enable-drop="true"
-                    enable-drag="true"
-                    enable-collapse="true"
-
-                    icon-leaf="none"
-                    icon-expand="glyphicon glyphicon-chevron-down"
-                    icon-collapse="glyphicon glyphicon-chevron-right"
-                    ></tree-dnd>
-        </panel>
-    </div>
-</div>
-
-<div class="col-xs-5">
-    <panel title="Differenced: Template Inside (Only Drag)" type="success">
-        <tree-dnd tree-data="tree_data"
-                  tree-control="my_tree"
-                  column-defs="[]"
-                  expand-on="expanding_property"
-
-                  enable-drag="true"
-
-                  icon-leaf="none"
-                  icon-expand="glyphicon glyphicon-chevron-down"
-                  icon-collapse="glyphicon glyphicon-chevron-right"
-                >
-            <ul tree-dnd-nodes style="min-height: 100px"
-                ng-class="(treeData.length) ? '' : 'list-group-item active'">
-                <li tree-dnd-node="node" ng-repeat="node in treeData track by node.__hashKey__"
-                    ng-show="node.__visible__" compile="expandingProperty.cellTemplate"
-                    ng-include="'tree-dnd-template-fetch.html'"></li>
-            </ul>
-        </tree-dnd>
-    </panel>
-</div>
+<br>
+<tree-dnd callbacks="callbacks" tree-data="tree_data" tree-control="my_tree" template-url="list-tree-template.html" enable-drop="true" enable-drag="true" expand-on="nodeId"></tree-dnd>
+<br>
+<button class="btn btn-default" ng-click="my_tree.reload_data()"><i class="fa fa-refresh"></i></button>
+<button class="btn btn-default" ng-click="my_tree.remove_nodes()">Delete selection</button>
+<button class="btn btn-default" ng-click="my_tree.ungroup_node()">Ungroup selection</button>
+<button class="btn btn-default" ng-click="my_tree.group_selected_nodes()">Group selection</button>
+<button class="btn btn-default" ng-click="my_tree.deselect_all()">Deselect</button>
+<br>
+<br>
+<!--<pre>{{moveEvent | json}}</pre>-->
+<pre>{{my_tree.get_anchor_node() | json}}</pre>
+<br>
+<br>
+<a href="http://thienhung1989.github.io/angular-tree-dnd/demo/#/basic">Based on Angular Tree DnD</a>

@@ -48,9 +48,9 @@
             drag:   'tree-dnd-drag',
             status: 'tree-dnd-status',
             icon:   {
-                '1':  'glyphicon glyphicon-minus',
-                '0':  'glyphicon glyphicon-plus',
-                '-1': 'glyphicon glyphicon-file'
+              '1':  'fa fa-fw fa-chevron-down',
+              '0':  'fa fa-fw fa-chevron-right',
+              '-1': 'fa fa-fw'
             }
         }
     );//<!--Replace_Concat-->

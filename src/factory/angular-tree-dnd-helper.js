@@ -21,6 +21,7 @@ angular.module('ntt.TreeDnD')
                                _parent = scope.getNode(_node.__parent_real__);
                            return {
                                node:    _node,
+                               nodes:    _tree.tree.get_selected_nodes(),
                                parent:  _parent,
                                move:    {
                                    parent: _parent,

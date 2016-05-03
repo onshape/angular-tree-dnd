@@ -23,7 +23,7 @@ var gulp       = require('gulp'),
 
 gulp.task(
     'build', ['min-css', 'jshint', 'min-js'], function () {
-        return gulp.start('jshint-dist', 'test');
+        return gulp.start('jshint-dist', 'concat');
     }
 );
 

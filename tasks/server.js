@@ -49,7 +49,7 @@ module.exports = function (gulp, $) {
                 [
                     '.jshintrc',
                     'src/**/*.js'
-                ], ['jshint']
+                ], ['jshint', 'concat']
             );
 
             gulp.watch(
