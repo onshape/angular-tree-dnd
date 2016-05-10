@@ -37,9 +37,9 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
         $scope.$class = angular.copy($TreeDnDClass);
         angular.extend(
             $scope.$class.icon, {
-                '1':  $attrs.iconExpand || 'glyphicon glyphicon-minus',
-                '0':  $attrs.iconCollapse || 'glyphicon glyphicon-plus',
-                '-1': $attrs.iconLeaf || 'glyphicon glyphicon-file'
+                '1':  $attrs.iconExpand     || 'fa fa-fw fa-chevron-down',
+                '0':  $attrs.iconCollapse   || 'fa fa-fw fa-chevron-right',
+                '-1': $attrs.iconLeaf       || 'fa fa-fw'
             }
         );
 
@@ -67,7 +67,7 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
         $scope.getLastDescendant = function (node) {
             var last_child, n;
             if (!node) {
-                node = $scope.tree ? $scope.tree.selected_node : false;
+                node = $scope.tree ? $scope.tree.anchor_node : false;
             }
             if (node === false) {
                 return false;
@@ -85,32 +85,43 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
             return angular.element($element[0].querySelector('[tree-dnd-nodes]'));
         };
 
-        $scope.onClick = function (node) {
-            if (angular.isDefined($scope.tree) && angular.isFunction($scope.tree.on_click)) {
-                // We want to detach from Angular's digest cycle so we can
-                // independently measure the time for one cycle.
-                setTimeout(
-                    function () {
-                        $scope.tree.on_click(node);
-                    }, 0
-                );
-            }
-        };
-
-        $scope.onSelect = function (node) {
-            if (angular.isDefined($scope.tree)) {
-                if (node !== $scope.tree.selected_node) {
-                    $scope.tree.select_node(node);
-                }
-
-                if (angular.isFunction($scope.tree.on_select)) {
-                    setTimeout(
+        $scope.onClick = function (node, event) {
+                  if (angular.isDefined($scope.tree)) {
+                    
+                    if (!event.metaKey && !event.shiftKey) {
+                      $scope.tree.select_anchor_node(node);
+                    }
+                    
+                    if (angular.isFunction($scope.tree.on_click)) {
+                      setTimeout(
                         function () {
-                            $scope.tree.on_select(node);
+                          $scope.tree.on_click(node);
                         }, 0
-                    );
-                }
+                      );
+                    }
+                  }
+                };
+
+        $scope.onSelect = function (node, event) {
+          if (angular.isDefined($scope.tree)) {
+            if (event.metaKey) {
+              // add to selection
+              $scope.tree.add_select_node(node);
+            } else if (event.shiftKey) {
+              // select all nodes between anchor and this
+              $scope.tree.range_select_node(node);
+            } else if (!node.__selected__) {
+              $scope.tree.select_anchor_node(node);
             }
+
+            if (angular.isFunction($scope.tree.on_select)) {
+              setTimeout(
+                  function () {
+                    $scope.tree.on_select(node);
+                  }, 0
+              );
+            }
+          }
         };
 
         var passedExpand, _clone;
@@ -281,62 +292,45 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
                                 info.drag.reload_data();
                             }
                         },
-                        dropped:    function (info, pass) {
+                        dropped:    function (info, pass, isMove) {
                             if (!info) {
                                 return null;
                             }
 
-                            var _node         = info.node,
-                                _nodeAdd      = null,
-                                _move         = info.move,
-                                _parent       = null,
-                                _parentRemove = info.parent || info.drag.treeData,
-                                _parentAdd    = _move.parent || info.target.treeData,
-                                isMove        = info.drag.enabledMove;
-
-                            if (!info.changed && isMove) {
-                                return false;
-                            }
+                            var _node = info.node,
+                                _nodes = info.nodes,
+                                _tree = info.drag.tree,
+                                _nodeAdd = null,
+                                _move = info.move,
+                                _parent = _move.parent
 
                             if (info.target.$callbacks.accept(info, info.move, info.changed)) {
-                                if (isMove) {
-                                    _parent = _parentRemove;
-                                    if (angular.isDefined(_parent.__children__)) {
-                                        _parent = _parent.__children__;
+                              if (isMove) {
+                                _tree.remove_nodes(_nodes, true);
+                              } else {
+                                _nodeAdd = info.drag.$callbacks.clone(_node, info.drag.$callbacks);
+                              }
+                              
+                              // If any of the nodes being moved were removed from the new parent 
+                              // with an index before _move.pos, the new position will be incorrect.
+                              // The position will have to be corrected by subtracting the 
+                              // number of nodes preceding _move.pos
+                                var startPos = _move.pos;
+                                
+                                if (info.drag === info.target) {
+                                  _nodes.forEach(function(node) {
+                                    var hasSameParent = _tree.get_parent(node) === _move.parent,
+                                        hasLowerIndex = node.__index__ < startPos;
+                                    if (hasSameParent && hasLowerIndex) {
+                                      _move.pos--;
                                     }
-
-                                    _nodeAdd = info.drag.$callbacks.remove(
-                                        _node,
-                                        _parent,
-                                        info.drag.$callbacks,
-                                        true // delay reload
-                                    );
-                                } else {
-                                    _nodeAdd = info.drag.$callbacks.clone(_node, info.drag.$callbacks);
+                                  });
                                 }
+                              
+                              // Add the nodes to the parent at the position.
+                              _tree.add_nodes(_parent, _nodes, _move.pos)
 
-                                // if node dragging change index in sample node parent
-                                // and index node decrement
-                                if (isMove &&
-                                    info.drag === info.target &&
-                                    _parentRemove === _parentAdd &&
-                                    _move.pos >= info.node.__index__) {
-                                    _move.pos--;
-                                }
-
-                                _parent = _parentAdd;
-                                if (_parent.__children__) {
-                                    _parent = _parent.__children__;
-                                }
-
-                                info.target.$callbacks.add(
-                                    _nodeAdd,
-                                    _move.pos,
-                                    _parent,
-                                    info.drag.$callbacks
-                                );
-
-                                return true;
+                              return true;
                             }
 
                             return false;

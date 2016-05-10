@@ -51,7 +51,6 @@ angular.module('ntt.TreeDnD')
                 hashKey  = scope[keyNode].__hashKey__,
                 skipAttr = [
                     '__visible__',
-                    '__children__',
                     '__level__',
                     '__index__',
                     '__index_real__',
@@ -130,6 +129,7 @@ angular.module('ntt.TreeDnD')
 
                     if (_len === 0) {
                         _icon = -1;
+                        nodeOf.__expanded__ = false;
                     } else {
                         if (nodeOf.__expanded__) {
                             _icon = 1;
@@ -141,7 +141,7 @@ angular.module('ntt.TreeDnD')
                     nodeOf.__icon__       = _icon;
                     nodeOf.__icon_class__ = scope.$class.icon[_icon];
 
-                    if (scope.isTable) {
+                    if (!scope.isTable) {
                         for (_i = 0; _i < _len; _i++) {
                             scope.for_all_descendants(_childs[_i], scope.hiddenChild, nodeOf, true);
                         }
