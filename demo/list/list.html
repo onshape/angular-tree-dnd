@@ -2,10 +2,7 @@
     <div class="list-group-item tree-dnd-node" ng-class="{'selected': node.__selected__}" ng-mousedown="onSelect(node, $event)" ng-click="onClick(node, $event)" tree-dnd-node-handle>
         <i class="tree-icon" ng-class="node.__icon_class__" ng-click="toggleExpand(node)"></i>
         <i class="tree-icon" ng-class="getIcon(node)"></i>
-        <span>
-      {{node[expandingProperty.field] || node[expandingProperty]}}
-    </span>
-        <div style="flex-grow:1; height: 20px"></div>
+        <span>{{node[expandingProperty.field] || node[expandingProperty]}}</span>
     </div>
     <ul tree-dnd-nodes>
         <li tree-dnd-node="node" ng-repeat="node in node.__children__ track by node.__hashKey__" ng-show="node.__visible__" compile="expandingProperty.cellTemplate" ng-include="'list-node-template.html'" on-select="select_handler(node)"></li>

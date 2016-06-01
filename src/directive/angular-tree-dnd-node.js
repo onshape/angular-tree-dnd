@@ -7,7 +7,6 @@ angular.module('ntt.TreeDnD')
             link:     fnLink
         };
         function fnLink(scope, element, attrs) {
-
             scope.$node_class = '';
 
             if (scope.$class.node) {
