@@ -95,7 +95,7 @@
         }]
 );
 
-angular.module('ntt.TreeDnD')    .directive(    'treeDndNodeHandle', function () {        return {            restrict: 'A',            scope:    true,            link:     function (scope, element, attrs) {                scope.$type = 'TreeDnDNodeHandle';                if (scope.$class.handle) {                    element.addClass(scope.$class.handle);                }            }        };    });
+angular.module('ntt.TreeDnD')    .directive(    'treeDndNodeHandle', function () {        return {            restrict: 'A',            scope:    true,            link:     function (scope, element, attrs) {                element.data('$scope', scope);                scope.$type = 'TreeDnDNodeHandle';                if (scope.$class.handle) {                    element.addClass(scope.$class.handle);                }            }        };    });
 
 angular.module('ntt.TreeDnD')
     .directive(
@@ -106,6 +106,7 @@ angular.module('ntt.TreeDnD')
             link:     fnLink
         };
         function fnLink(scope, element, attrs) {
+            element.data('$scope', scope);
 
             scope.$node_class = '';
 
@@ -576,6 +577,10 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
                         dropped:    function (info, pass, isMove) {
                             if (!info) {
                                 return null;
+                            }
+
+                            if (!info.changed && isMove) {
+                              return false;
                             }
 
                             var _node = info.node,
@@ -2185,8 +2190,8 @@ angular.module('ntt.TreeDnD')
                   return;
                 }
                 // the element which is clicked.
-                var eventElm = angular.element(e.target),
-                    eventScope = eventElm.scope();
+                var eventElm = angular.element(e.target);
+                var eventScope = eventElm.scope();
                 if (!eventScope || !eventScope.$type) {
                   return;
                 }
