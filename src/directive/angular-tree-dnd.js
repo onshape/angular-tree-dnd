@@ -297,6 +297,10 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
                                 return null;
                             }
 
+                            if (!info.changed && isMove) {
+                              return false;
+                            }
+
                             var _node = info.node,
                                 _nodes = info.nodes,
                                 _tree = info.drag.tree,

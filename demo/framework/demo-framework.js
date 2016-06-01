@@ -6,7 +6,8 @@ app = angular.module('TreeDnDTest', deps)
     .config(
     [
         '$routeProvider',
-        function ($routeProvider) {
+        '$compileProvider',
+        function ($routeProvider, $compileProvider) {
             $routeProvider
                 .when(
                 '/basic', {
@@ -39,6 +40,8 @@ app = angular.module('TreeDnDTest', deps)
                 }
             )
                 .otherwise({redirectTo: '/basic'});
+
+            $compileProvider.debugInfoEnabled(false);
         }]
 ).
     directive(

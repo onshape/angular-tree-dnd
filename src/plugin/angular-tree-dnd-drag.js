@@ -25,8 +25,8 @@ angular.module('ntt.TreeDnD')
                   return;
                 }
                 // the element which is clicked.
-                var eventElm = angular.element(e.target),
-                    eventScope = eventElm.scope();
+                var eventElm = angular.element(e.target);
+                var eventScope = eventElm.scope();
                 if (!eventScope || !eventScope.$type) {
                   return;
                 }
