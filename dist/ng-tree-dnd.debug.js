@@ -2267,9 +2267,7 @@ angular.module('ntt.TreeDnD')
                       .addClass(_$scope.$tree_class);
                 } else {
                   $params.dragElm = angular.element($params.$window.document.createElement('ul'))
-                      .addClass(_$scope.$class.hidden)
-                      .addClass('tree-dnd-nodes')
-                      .addClass(_$scope.$tree_class);
+                  .addClass(_$scope.$class.hidden);
                 }
 
                 $params.dragElm.css(
@@ -2322,35 +2320,7 @@ angular.module('ntt.TreeDnD')
                   );
 
                   $params.dragElm.append(_tbody);
-                } else {
-
-                  if (!_needCollapse) {
-                    _clone = _element.clone();
-                  } else {
-                    var _holder = _scope.getElementChilds(),
-                        _swaper = angular.element('<swaped />');
-
-                    // Insert tag `<holder>` & move _holder into tag `<swaper>`;
-                    _holder.after(angular.element('<holder />'));
-                    _swaper.append(_holder);
-
-                    // Clone without Children & remove tag `<holder>`
-                    _clone = _element.clone();
-                    _clone.find('holder').remove();
-
-                    // bring childs back frome `swaper` & remove tag `<swaper>`
-                    _element.find('holder').replaceWith(_holder);
-
-                    // Reset & clear all;
-                    _swaper.remove();
-                    _holder = null;
-                  }
-
-                  $params.dragElm.append(_clone);
-                  if (_$scope.enabledMove && _$scope.$class.hien) {
-                    _element.addClass(_$scope.$class.hidden);
-                  }
-                }
+                } 
 
                 $params.dragElm.css(
                     {
