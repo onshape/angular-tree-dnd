@@ -109,6 +109,20 @@ angular.module('ntt.TreeDnD')
 
                     if (!nodeOf.__inited__) {
                         nodeOf.__inited__ = true;
+                        if (nodeOf.__selected__) {
+                          delete nodeOf.__selected__;
+                          // delete the old node if it is already in the selection
+                          var selected = scope.tree.get_selected_nodes();
+
+                          for (var i = 0; i < selected.length; i++) {
+                            if (selected[i][scope.primary_key] === nodeOf[scope.primary_key]) {
+                              selected.splice(i, 1);
+                              break;
+                            }
+                          }
+
+                          scope.tree.select_node(nodeOf);
+                        }
                     }
 
                     if (nodeOf.__hashKey__ !== hashKey) {

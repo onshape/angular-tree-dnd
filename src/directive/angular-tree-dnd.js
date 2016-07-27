@@ -104,7 +104,7 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
 
         $scope.onSelect = function (node, event) {
           if (angular.isDefined($scope.tree)) {
-            if (event.metaKey) {
+            if (event.metaKey || event.ctrlKey) {
               // add to selection
               $scope.tree.add_select_node(node);
             } else if (event.shiftKey) {

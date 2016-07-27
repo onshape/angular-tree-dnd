@@ -202,6 +202,20 @@ angular.module('ntt.TreeDnD')
 
                     if (!nodeOf.__inited__) {
                         nodeOf.__inited__ = true;
+                        if (nodeOf.__selected__) {
+                          delete nodeOf.__selected__;
+                          // delete the old node if it is already in the selection
+                          var selected = scope.tree.get_selected_nodes();
+
+                          for (var i = 0; i < selected.length; i++) {
+                            if (selected[i][scope.primary_key] === nodeOf[scope.primary_key]) {
+                              selected.splice(i, 1);
+                              break;
+                            }
+                          }
+
+                          scope.tree.select_node(nodeOf);
+                        }
                     }
 
                     if (nodeOf.__hashKey__ !== hashKey) {
@@ -386,7 +400,7 @@ function fnInitTreeDnD($timeout, $http, $compile, $parse, $window, $document, $t
 
         $scope.onSelect = function (node, event) {
           if (angular.isDefined($scope.tree)) {
-            if (event.metaKey) {
+            if (event.metaKey || event.ctrlKey) {
               // add to selection
               $scope.tree.add_select_node(node);
             } else if (event.shiftKey) {
@@ -3429,7 +3443,11 @@ angular.module('ntt.TreeDnD')
                   }
 
                   _parent = tree.get_parent(node);
-                  return tree.get_closest_ancestor_next_sibling(_parent);
+                  if (_parent) {
+                    return tree.get_closest_ancestor_next_sibling(_parent);
+                  }
+
+                  return null;
                 },
                 get_next_node:                     function (node) {
                   node = node || tree.anchor_node;
